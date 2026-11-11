@@ -1,33 +1,44 @@
+def _cost(s, a):
+    """2-깊이 a개를 써서 마지막 2-깊이에 분배 노드 s개를 만들 때 필요한 최소 분배 노드 수."""
+    total = 0
+    for _ in range(a):
+        total += s
+        s = max((s + 1) // 2, 1)
+    return total
+
+
 def solution(dist_limit, split_limit):
-    max_leaves = 1  # 분배 노드를 0개 쓸 때 루트의 자식 1개가 리프인 경우 (최소 1개)
-
-    def dfs(n_nodes, current_prod, dist_used, current_leaves):
-        nonlocal max_leaves
-        
-        # c: 자식 수 (2 또는 3)
-        for c in (2, 3):
-            if current_prod * c > split_limit:
-                continue
-            if dist_used + n_nodes > dist_limit:
-                continue
-                
-            # k_leaf: 현재 노드들의 자식 중 리프가 되는 수 (0부터 c까지 가능)
-            for k_leaf in range(c + 1):
-                leaves_produced = n_nodes * k_leaf
-                next_n_nodes = n_nodes * (c - k_leaf)
-                
-                total_leaves = current_leaves + leaves_produced
-                if total_leaves > max_leaves:
-                    max_leaves = total_leaves
-                    
-                # 다음 레벨로 넘어갈 분배 노드가 있는 경우에만 탐색 지속
-                if next_n_nodes > 0:
-                    dfs(next_n_nodes, current_prod * c, dist_used + n_nodes, total_leaves)
-
-    # 깊이 1에서 루트의 자식(분배 노드 1개, n_nodes=1, current_prod=1, dist_used=0)으로부터 시작
-    dfs(1, 1, 0, 0)
-    
-    return max_leaves
+    # 같은 깊이의 분배 노드는 자식 수가 같으므로 트리는 깊이별 자식 수 수열로 결정된다.
+    # 순서는 2를 모두 앞에, 3을 모두 뒤에 두는 2^a 3^b로 고정한다.
+    D = dist_limit
+    best = 1
+    a, p2 = 0, 1
+    while p2 <= split_limit:
+        b, p = 0, p2
+        while p * 3 <= split_limit:
+            b, p = b + 1, p * 3
+        K = 3 ** b - 1  # 2-단계 끝 분배 노드 s개 → 3-단계 수용량 s*K
+        if a == 0:
+            best = max(best, 1 + 2 * min(D, K // 2))
+        elif _cost(1, a) <= D:
+            lo, hi = 1, 2 ** (a - 1)
+            # D - cost(s) >= K*s 를 만족하는 최대 s
+            if D - _cost(1, a) >= K:
+                while lo < hi:
+                    mid = (lo + hi + 1) // 2
+                    if D - _cost(mid, a) >= K * mid:
+                        lo = mid
+                    else:
+                        hi = mid - 1
+            for s in (lo, lo + 1):
+                if s <= 2 ** (a - 1) and _cost(s, a) <= D:
+                    x = _cost(s, a)
+                    used3 = min(D - x, K * s)
+                    # 남은 예산은 앞쪽 2-깊이(용량 2^(i-1))의 빈자리에 추가 분할로 사용
+                    extra = min(D - x - used3, (2 ** (a - 1) - 1) - (x - s))
+                    best = max(best, 1 + x + 2 * used3 + extra)
+        a, p2 = a + 1, p2 * 2
+    return best
 
 
 if __name__ == "__main__":
