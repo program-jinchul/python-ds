@@ -15,7 +15,7 @@
 - [x] 이중 연결 리스트 (Doubly Linked List)
 - [x] 원형 연결 리스트 (Circular Linked List)
 
-그 외 자료구조와 알고리즘은 순서대로 추가할 예정입니다.
+그 외 자료구조와 알고리즘은 순서대로 추가할 예정
 
 ## 구조
 
@@ -31,7 +31,7 @@ python-ds/
 ## 연결 리스트 비교
 
 세 리스트는 모두 같은 연산을 제공합니다: `append`, `prepend`, `insert_after`, `search`, `delete`, `display`.
-`insert_after`, `search`, `delete`는 성공 여부를 `True` / `False`로 반환합니다.
+`insert_after`, `search`, `delete`는 성공 여부를 `True` / `False`로 반환
 
 | 연산 | 단순 | 이중 | 원형 |
 |------|------|------|------|
